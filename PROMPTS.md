@@ -81,3 +81,13 @@ The assistant continued from the existing Red-phase tests, implemented partial v
 **AI assistance:**
 
 The assistant created tests before implementing purchase and restock workflows. It used a conditional MongoDB update to prevent stock from going below zero, returned a clear out-of-stock response, and restricted restocking to administrators.
+
+## 2026-07-23 — Step 8: complete frontend workflows
+
+**User prompt:**
+
+> study the current folder structure and complete the assignment as instructed originally. complete it step by step. complete the whole step in one go, all phases altogether, commit, then give me the prompt for next step
+
+**AI assistance:**
+
+The assistant completed the React application workflows against the existing FastAPI API: registration and login, inventory loading and search, purchasing, and administrator vehicle creation, editing, restocking, and deletion. It added a UI purchase test, verified the frontend test/build and backend regression suites, and updated the run documentation.

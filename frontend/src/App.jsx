@@ -1,14 +1,136 @@
-import { useEffect, useState } from 'react'
-const API = import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000'
-const api = (path, token, options = {}) => fetch(`${API}${path}`, { ...options, headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) } })
+import { useEffect, useMemo, useState } from 'react'
 
-function Dashboard({ token, onLogout }) {
-  const [inventory, setInventory] = useState([]); const [query, setQuery] = useState('')
-  const admin = JSON.parse(atob(token.split('.')[1])).role === 'admin'
-  useEffect(() => { api('/api/vehicles', token).then(r => r.json()).then(setInventory) }, [token])
-  const vehicles = inventory.filter(v => `${v.make} ${v.model} ${v.category}`.toLowerCase().includes(query.toLowerCase()))
-  return <main className="min-h-screen bg-slate-50 text-slate-900"><header className="border-b bg-white"><div className="mx-auto flex max-w-6xl justify-between p-5"><b>DRIVEFLOW</b><button onClick={onLogout}>Sign out</button></div></header><section className="mx-auto max-w-6xl p-6"><h1 className="text-3xl font-bold">Vehicle inventory</h1><input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search make, model, or category" className="mt-5 w-full max-w-md rounded-xl border bg-white p-3"/><div className="mt-8 grid gap-5 md:grid-cols-3">{vehicles.map(v => <article key={v.id} className="rounded-2xl bg-white p-6 shadow"><p className="text-blue-600">{v.category}</p><h2 className="text-xl font-bold">{v.make} {v.model}</h2><p className="mt-4 text-2xl font-bold">${v.price.toLocaleString()}</p><p>{v.quantity} in stock</p><button disabled={!v.quantity} className="mt-4 w-full rounded-xl bg-slate-900 py-3 text-white">Purchase vehicle</button>{admin && <><button aria-label="Edit vehicle" className="mt-2 w-full rounded-xl border py-2">Edit vehicle</button><button className="mt-2 w-full rounded-xl border py-2">Restock</button><button className="mt-2 w-full rounded-xl border border-red-200 py-2 text-red-600">Delete vehicle</button></>}</article>)}</div></section></main>
+const API_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:8000'
+
+function request(path, token, options = {}) {
+  return fetch(`${API_URL}${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options.headers,
+    },
+  })
 }
 
-function Auth({ onLogin }) { return <main className="grid min-h-screen place-items-center bg-slate-950"><button onClick={() => onLogin('')} className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white">Sign in</button></main> }
-export default function App() { const [token, setToken] = useState(() => localStorage.getItem('accessToken')); return token ? <Dashboard token={token} onLogout={() => { localStorage.clear(); setToken(null) }} /> : <Auth onLogin={setToken} /> }
+function userIsAdmin(token) {
+  try {
+    return JSON.parse(atob(token.split('.')[1])).role === 'admin'
+  } catch {
+    return false
+  }
+}
+
+function AuthScreen({ onLogin }) {
+  const [mode, setMode] = useState('login')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  async function submit(event) {
+    event.preventDefault()
+    setLoading(true)
+    setMessage('')
+    try {
+      const response = await request(`/api/auth/${mode}`, null, {
+        method: 'POST', body: JSON.stringify({ email, password }),
+      })
+      const data = await response.json()
+      if (!response.ok) return setMessage(data.detail || 'Unable to continue.')
+      if (mode === 'login') onLogin(data.access_token)
+      else {
+        setMode('login')
+        setMessage('Account created. You can now sign in.')
+      }
+    } catch {
+      setMessage('Cannot reach the API. Start the FastAPI server and try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return <main className="min-h-screen bg-slate-950 px-5 py-10 text-white"><div className="mx-auto grid max-w-5xl overflow-hidden rounded-3xl bg-white shadow-2xl md:grid-cols-2"><section className="bg-gradient-to-br from-blue-600 to-indigo-800 p-10 md:p-14"><p className="text-sm font-semibold tracking-[0.25em] text-blue-200">DRIVEFLOW</p><h1 className="mt-16 text-4xl font-bold leading-tight">Dealer inventory, beautifully managed.</h1><p className="mt-5 max-w-sm text-blue-100">Search live inventory, purchase available vehicles, and manage stock with confidence.</p></section><section className="p-8 text-slate-900 md:p-14"><h2 className="text-2xl font-bold">{mode === 'login' ? 'Welcome back' : 'Create your account'}</h2><p className="mt-2 text-slate-500">{mode === 'login' ? 'Sign in to explore the inventory.' : 'Registration creates a standard customer account.'}</p><form onSubmit={submit} className="mt-8 space-y-4"><input aria-label="Email address" value={email} onChange={event => setEmail(event.target.value)} type="email" placeholder="Email address" required className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-500"/><input aria-label="Password" value={password} onChange={event => setPassword(event.target.value)} type="password" placeholder="Password (8+ characters)" minLength="8" required className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:border-blue-500"/><button disabled={loading} className="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white disabled:opacity-60">{loading ? 'Please wait...' : mode === 'login' ? 'Sign in' : 'Create account'}</button></form>{message && <p role="status" className="mt-4 text-sm text-slate-600">{message}</p>}<button type="button" onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setMessage('') }} className="mt-6 text-sm font-semibold text-blue-600">{mode === 'login' ? 'New here? Create an account' : 'Already have an account? Sign in'}</button></section></div></main>
+}
+
+function VehicleForm({ value, onChange, onSubmit, submitLabel, onCancel }) {
+  return <form onSubmit={onSubmit} className="grid gap-3 rounded-2xl bg-blue-50 p-4 md:grid-cols-6">{['make', 'model', 'category', 'price', 'quantity'].map(field => <input key={field} aria-label={field} value={value[field]} onChange={event => onChange({ ...value, [field]: event.target.value })} placeholder={field[0].toUpperCase() + field.slice(1)} required type={field === 'price' || field === 'quantity' ? 'number' : 'text'} min={field === 'quantity' ? '0' : field === 'price' ? '0.01' : undefined} step={field === 'price' ? '0.01' : undefined} className="rounded-lg border bg-white px-3 py-2"/>)}<div className="flex gap-2"><button className="rounded-lg bg-blue-600 px-3 py-2 font-semibold text-white">{submitLabel}</button>{onCancel && <button type="button" onClick={onCancel} className="rounded-lg border px-3 py-2">Cancel</button>}</div></form>
+}
+
+function Dashboard({ token, onLogout }) {
+  const [vehicles, setVehicles] = useState([])
+  const [query, setQuery] = useState('')
+  const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [editing, setEditing] = useState(null)
+  const [newVehicle, setNewVehicle] = useState({ make: '', model: '', category: '', price: '', quantity: '' })
+  const isAdmin = userIsAdmin(token)
+
+  async function load() {
+    setLoading(true)
+    try {
+      const response = await request('/api/vehicles', token)
+      const data = await response.json()
+      if (response.ok) setVehicles(data)
+      else {
+        setMessage(data.detail || 'Your session expired.')
+        if (response.status === 401) onLogout()
+      }
+    } catch {
+      setMessage('Cannot reach the API. Start the FastAPI server and try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { load() }, [])
+  const visibleVehicles = useMemo(() => vehicles.filter(vehicle => `${vehicle.make} ${vehicle.model} ${vehicle.category}`.toLowerCase().includes(query.toLowerCase())), [vehicles, query])
+  const updateVehicle = vehicle => setVehicles(items => items.map(item => item.id === vehicle.id ? vehicle : item))
+
+  async function purchase(vehicle) {
+    const response = await request(`/api/vehicles/${vehicle.id}/purchase`, token, { method: 'POST' })
+    const data = await response.json()
+    if (response.ok) { updateVehicle(data); setMessage(`${vehicle.make} ${vehicle.model} purchased.`) }
+    else setMessage(data.detail || 'Purchase could not be completed.')
+  }
+
+  async function addVehicle(event) {
+    event.preventDefault()
+    const response = await request('/api/vehicles', token, { method: 'POST', body: JSON.stringify({ ...newVehicle, price: Number(newVehicle.price), quantity: Number(newVehicle.quantity) }) })
+    const data = await response.json()
+    if (response.ok) { setVehicles(items => [...items, data]); setNewVehicle({ make: '', model: '', category: '', price: '', quantity: '' }); setMessage('Vehicle added.') }
+    else setMessage(data.detail || 'Could not add vehicle.')
+  }
+
+  async function saveVehicle(event) {
+    event.preventDefault()
+    const response = await request(`/api/vehicles/${editing.id}`, token, { method: 'PUT', body: JSON.stringify({ make: editing.make, model: editing.model, category: editing.category, price: Number(editing.price), quantity: Number(editing.quantity) }) })
+    const data = await response.json()
+    if (response.ok) { updateVehicle(data); setEditing(null); setMessage('Vehicle updated.') }
+    else setMessage(data.detail || 'Could not update vehicle.')
+  }
+
+  async function restockVehicle(vehicle) {
+    const amount = Number(window.prompt('Units to add:', '1'))
+    if (!Number.isInteger(amount) || amount < 1) return
+    const response = await request(`/api/vehicles/${vehicle.id}/restock`, token, { method: 'POST', body: JSON.stringify({ amount }) })
+    const data = await response.json()
+    if (response.ok) { updateVehicle(data); setMessage('Vehicle restocked.') }
+    else setMessage(data.detail || 'Could not restock vehicle.')
+  }
+
+  async function removeVehicle(id) {
+    if (!window.confirm('Delete this vehicle?')) return
+    const response = await request(`/api/vehicles/${id}`, token, { method: 'DELETE' })
+    if (response.ok) { setVehicles(items => items.filter(vehicle => vehicle.id !== id)); setMessage('Vehicle deleted.') }
+    else { const data = await response.json(); setMessage(data.detail || 'Could not delete vehicle.') }
+  }
+
+  return <main className="min-h-screen bg-slate-50 text-slate-900"><header className="border-b bg-white"><div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5"><div><p className="text-xs font-bold tracking-[0.25em] text-blue-600">DRIVEFLOW</p><h1 className="text-xl font-bold">Vehicle inventory</h1></div><button onClick={onLogout} className="rounded-lg border px-4 py-2 text-sm font-semibold">Sign out</button></div></header><section className="mx-auto max-w-6xl px-5 py-10"><div className="flex flex-col justify-between gap-4 md:flex-row md:items-end"><div><h2 className="text-3xl font-bold">Find your next vehicle</h2><p className="mt-2 text-slate-500">Browse current dealership stock and purchase available units.</p></div><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search make, model, or category" className="w-full rounded-xl border bg-white px-4 py-3 md:max-w-sm"/></div>{isAdmin && <div className="mt-6"><h3 className="mb-2 font-semibold">Add vehicle</h3><VehicleForm value={newVehicle} onChange={setNewVehicle} onSubmit={addVehicle} submitLabel="Add vehicle"/></div>}{message && <p role="status" className="mt-5 rounded-lg bg-amber-50 p-3 text-amber-800">{message}</p>}<div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{loading ? <p>Loading inventory...</p> : visibleVehicles.map(vehicle => <article key={vehicle.id} className="rounded-2xl border bg-white p-6 shadow-sm"><p className="text-sm font-semibold text-blue-600">{vehicle.category}</p><h3 className="mt-2 text-xl font-bold">{vehicle.make} {vehicle.model}</h3><p className="mt-5 text-2xl font-bold">${vehicle.price.toLocaleString()}</p><p className="mt-1 text-sm text-slate-500">{vehicle.quantity} in stock</p><button disabled={vehicle.quantity === 0} onClick={() => purchase(vehicle)} className="mt-6 w-full rounded-xl bg-slate-900 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300">{vehicle.quantity === 0 ? 'Out of stock' : 'Purchase vehicle'}</button>{isAdmin && <><button aria-label="Edit vehicle" onClick={() => setEditing({ ...vehicle })} className="mt-2 w-full rounded-xl border py-2 text-sm font-semibold">Edit vehicle</button><button onClick={() => restockVehicle(vehicle)} className="mt-2 w-full rounded-xl border border-blue-200 py-2 text-sm font-semibold text-blue-700">Restock</button><button onClick={() => removeVehicle(vehicle.id)} className="mt-2 w-full rounded-xl border border-red-200 py-2 text-sm font-semibold text-red-600">Delete vehicle</button></>}</article>)}</div>{!loading && visibleVehicles.length === 0 && <p className="mt-8 text-slate-500">No vehicles match your search.</p>}</section>{editing && <div className="fixed inset-0 grid place-items-center bg-slate-950/50 p-4"><div className="w-full max-w-4xl rounded-2xl bg-white p-6 shadow-2xl"><h2 className="mb-4 text-2xl font-bold">Edit vehicle</h2><VehicleForm value={editing} onChange={setEditing} onSubmit={saveVehicle} submitLabel="Save changes" onCancel={() => setEditing(null)}/></div></div>}</main>
+}
+
+export default function App() {
+  const [token, setToken] = useState(() => localStorage.getItem('accessToken'))
+  const logout = () => { localStorage.removeItem('accessToken'); setToken(null) }
+  return token ? <Dashboard token={token} onLogout={logout}/> : <AuthScreen onLogin={value => { localStorage.setItem('accessToken', value); setToken(value) }}/>
+}
