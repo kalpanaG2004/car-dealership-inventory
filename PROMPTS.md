@@ -101,3 +101,13 @@ The assistant completed the React application workflows against the existing Fas
 **AI assistance:**
 
 The assistant started the local FastAPI and Vite services and verified the health endpoint. The configured MongoDB Atlas connection did not respond during administrator creation, and no controllable browser was available for screenshots in this environment. It finalized the README with reproducible startup instructions and a live acceptance/screenshot checklist; the live database and screenshot portions must be rerun once MongoDB connectivity and a browser are available.
+
+## 2026-07-23 — Step 10: live acceptance validation
+
+**User prompt:**
+
+> MongoDB Atlas access is enabled. Run the live customer and admin acceptance test, capture and save the required screenshots, update the README with their paths, and commit the final delivery assets.
+
+**AI assistance:**
+
+The assistant confirmed Atlas connectivity, created a delivery administrator, and performed a live API acceptance test: customer registration/login/search/purchase and administrator vehicle creation/restock/edit/deletion all passed. The temporary test vehicle was deleted after the run. The browser runtime still had no available browser, so screenshots could not be captured or falsely represented; the README records the verified results and required screenshot directory.

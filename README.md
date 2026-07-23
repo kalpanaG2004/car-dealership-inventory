@@ -45,7 +45,21 @@ Before recording screenshots, start MongoDB, the FastAPI server, and the Vite ap
 3. An administrator adding a vehicle and editing its details.
 4. An administrator restocking and deleting a vehicle.
 
-The automated verification completed on 2026-07-23 consists of 19 backend tests, 5 frontend tests, and a successful frontend production build. A live acceptance run additionally requires the configured MongoDB instance to be reachable from the machine running the app.
+The automated verification completed on 2026-07-23 consists of 19 backend tests, 5 frontend tests, and a successful frontend production build. A live acceptance run was also completed against MongoDB Atlas on 2026-07-23:
+
+| Workflow | Result |
+| --- | --- |
+| Customer registration and login | Passed |
+| Customer inventory search | Passed (one matching vehicle) |
+| Customer purchase | Passed (quantity 2 to 1) |
+| Administrator vehicle creation | Passed |
+| Administrator restock | Passed (quantity 1 to 4) |
+| Administrator edit | Passed (category and price updated) |
+| Administrator deletion | Passed (test vehicle removed) |
+
+## Screenshots
+
+Screenshots must be captured with a browser connected to the local Vite application and saved under `docs/screenshots/` using the four states in the acceptance checklist above. Screenshot capture was not possible in the automated delivery environment because no browser was available to control; no placeholder images are included or represented as live evidence.
 
 ## My AI Usage
 
