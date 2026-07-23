@@ -91,3 +91,13 @@ The assistant created tests before implementing purchase and restock workflows. 
 **AI assistance:**
 
 The assistant completed the React application workflows against the existing FastAPI API: registration and login, inventory loading and search, purchasing, and administrator vehicle creation, editing, restocking, and deletion. It added a UI purchase test, verified the frontend test/build and backend regression suites, and updated the run documentation.
+
+## 2026-07-23 — Step 9: delivery validation
+
+**User prompt:**
+
+> Start the final delivery step: run the full application locally with MongoDB, create an administrator account, perform a manual end-to-end acceptance test for customer and admin workflows, capture screenshots, and finalize the README submission documentation.
+
+**AI assistance:**
+
+The assistant started the local FastAPI and Vite services and verified the health endpoint. The configured MongoDB Atlas connection did not respond during administrator creation, and no controllable browser was available for screenshots in this environment. It finalized the README with reproducible startup instructions and a live acceptance/screenshot checklist; the live database and screenshot portions must be rerun once MongoDB connectivity and a browser are available.
