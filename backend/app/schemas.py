@@ -31,3 +31,15 @@ class UserResponse(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class VehicleCreate(BaseModel):
+    make: str = Field(min_length=1, max_length=80)
+    model: str = Field(min_length=1, max_length=80)
+    category: str = Field(min_length=1, max_length=80)
+    price: float = Field(gt=0)
+    quantity: int = Field(ge=0)
+
+
+class VehicleResponse(VehicleCreate):
+    id: str

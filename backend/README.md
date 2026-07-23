@@ -30,3 +30,7 @@ Configure `MONGODB_URL`, `MONGODB_DATABASE`, and a strong `JWT_SECRET_KEY` in `b
 - `POST /api/auth/login`
 
 Public registration always creates a `user` account. Administrative roles will be created through a controlled setup flow in a later step.
+
+## Inventory progress
+
+`POST /api/vehicles` is implemented and requires a valid Bearer token. The remaining vehicle listing, search, update, deletion, purchase, and restock endpoints will be added in subsequent test-driven steps.

@@ -41,3 +41,13 @@ The assistant guided a test-driven FastAPI foundation: first creating a failing 
 **AI assistance:**
 
 The assistant created tests before implementing registration and login. It then added MongoDB configuration, a database dependency, Argon2 password hashing, duplicate-email protection, and JWT login tokens. The tests use a mock MongoDB instance only for isolation; the application configuration targets a real MongoDB connection.
+
+## 2026-07-23 — Step 4: protected vehicle creation
+
+**User prompt:**
+
+> start step 4
+
+**AI assistance:**
+
+The assistant created tests before implementing the protected vehicle-creation endpoint. It then added bearer-token validation, current-user lookup from MongoDB, vehicle request validation, and persisted vehicle creation.
