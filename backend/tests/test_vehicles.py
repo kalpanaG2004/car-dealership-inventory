@@ -153,3 +153,60 @@ def test_deletes_a_vehicle_for_an_admin(database, client: TestClient) -> None:
 
     assert response.status_code == 204
     assert database.vehicles.find_one({"_id": vehicle_id}) is None
+
+
+def test_purchasing_a_vehicle_decreases_its_quantity(database, client: TestClient) -> None:
+    vehicle_id = database.vehicles.insert_one(
+        {"make": "Toyota", "model": "Camry", "category": "Sedan", "price": 28000, "quantity": 2}
+    ).inserted_id
+
+    response = client.post(
+        f"/api/vehicles/{vehicle_id}/purchase", headers=authorization_header(database)
+    )
+
+    assert response.status_code == 200
+    assert response.json()["quantity"] == 1
+    assert database.vehicles.find_one({"_id": vehicle_id})["quantity"] == 1
+
+
+def test_rejects_purchase_when_vehicle_is_out_of_stock(database, client: TestClient) -> None:
+    vehicle_id = database.vehicles.insert_one(
+        {"make": "Toyota", "model": "Camry", "category": "Sedan", "price": 28000, "quantity": 0}
+    ).inserted_id
+
+    response = client.post(
+        f"/api/vehicles/{vehicle_id}/purchase", headers=authorization_header(database)
+    )
+
+    assert response.status_code == 409
+    assert response.json()["detail"] == "Vehicle is out of stock"
+
+
+def test_restocking_requires_an_admin_role(database, client: TestClient) -> None:
+    vehicle_id = database.vehicles.insert_one(
+        {"make": "Toyota", "model": "Camry", "category": "Sedan", "price": 28000, "quantity": 2}
+    ).inserted_id
+
+    response = client.post(
+        f"/api/vehicles/{vehicle_id}/restock",
+        headers=authorization_header(database),
+        json={"amount": 3},
+    )
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Admin access required"
+
+
+def test_admin_restocking_increases_vehicle_quantity(database, client: TestClient) -> None:
+    vehicle_id = database.vehicles.insert_one(
+        {"make": "Toyota", "model": "Camry", "category": "Sedan", "price": 28000, "quantity": 2}
+    ).inserted_id
+
+    response = client.post(
+        f"/api/vehicles/{vehicle_id}/restock",
+        headers=authorization_header(database, role="admin"),
+        json={"amount": 3},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["quantity"] == 5
