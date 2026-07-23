@@ -41,3 +41,24 @@ def test_rejects_registration_with_an_existing_email(client: TestClient) -> None
 
     assert response.status_code == 409
     assert response.json()["detail"] == "An account with this email already exists"
+
+
+def test_logs_in_a_registered_user_and_returns_a_bearer_token(client: TestClient) -> None:
+    payload = {"email": "buyer@example.com", "password": "secure-password-123"}
+    client.post("/api/auth/register", json=payload)
+
+    response = client.post("/api/auth/login", json=payload)
+
+    assert response.status_code == 200
+    assert response.json()["token_type"] == "bearer"
+    assert response.json()["access_token"]
+
+
+def test_rejects_login_with_invalid_credentials(client: TestClient) -> None:
+    response = client.post(
+        "/api/auth/login",
+        json={"email": "buyer@example.com", "password": "incorrect-password"},
+    )
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Invalid email or password"
