@@ -22,6 +22,14 @@ def client(database) -> TestClient:
     app.dependency_overrides.clear()
 
 
+def authorization_header(database) -> dict[str, str]:
+    user_id = database.users.insert_one(
+        {"email": "buyer@example.com", "password_hash": "not-used", "role": "user"}
+    ).inserted_id
+    token = create_access_token(str(user_id), "user")
+    return {"Authorization": f"Bearer {token}"}
+
+
 def test_rejects_vehicle_creation_without_a_token(client: TestClient) -> None:
     response = client.post(
         "/api/vehicles",
@@ -38,14 +46,9 @@ def test_rejects_vehicle_creation_without_a_token(client: TestClient) -> None:
 
 
 def test_creates_a_vehicle_for_an_authenticated_user(database, client: TestClient) -> None:
-    user_id = database.users.insert_one(
-        {"email": "buyer@example.com", "password_hash": "not-used", "role": "user"}
-    ).inserted_id
-    token = create_access_token(str(user_id), "user")
-
     response = client.post(
         "/api/vehicles",
-        headers={"Authorization": f"Bearer {token}"},
+        headers=authorization_header(database),
         json={
             "make": "Toyota",
             "model": "Camry",
@@ -64,3 +67,43 @@ def test_creates_a_vehicle_for_an_authenticated_user(database, client: TestClien
         "price": 28000.0,
         "quantity": 4,
     }
+
+
+def test_lists_all_vehicles_for_an_authenticated_user(database, client: TestClient) -> None:
+    database.vehicles.insert_many(
+        [
+            {"make": "Toyota", "model": "Camry", "category": "Sedan", "price": 28000, "quantity": 4},
+            {"make": "Honda", "model": "CR-V", "category": "SUV", "price": 35000, "quantity": 0},
+        ]
+    )
+
+    response = client.get("/api/vehicles", headers=authorization_header(database))
+
+    assert response.status_code == 200
+    assert [vehicle["model"] for vehicle in response.json()] == ["Camry", "CR-V"]
+
+
+@pytest.mark.parametrize(
+    ("query", "expected_models"),
+    [
+        ("make=Toyota", ["Camry", "RAV4"]),
+        ("model=Civic", ["Civic"]),
+        ("category=SUV", ["RAV4"]),
+        ("min_price=25000&max_price=30000", ["Camry"]),
+    ],
+)
+def test_searches_vehicles_by_supported_filters(
+    database, client: TestClient, query: str, expected_models: list[str]
+) -> None:
+    database.vehicles.insert_many(
+        [
+            {"make": "Toyota", "model": "Camry", "category": "Sedan", "price": 28000, "quantity": 4},
+            {"make": "Toyota", "model": "RAV4", "category": "SUV", "price": 38000, "quantity": 3},
+            {"make": "Honda", "model": "Civic", "category": "Sedan", "price": 24000, "quantity": 2},
+        ]
+    )
+
+    response = client.get(f"/api/vehicles/search?{query}", headers=authorization_header(database))
+
+    assert response.status_code == 200
+    assert [vehicle["model"] for vehicle in response.json()] == expected_models
