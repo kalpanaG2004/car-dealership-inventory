@@ -33,3 +33,11 @@ test('shows a sign-in form for an unauthenticated visitor', () => {
   render(<App />)
   expect(screen.getByRole('button', { name: 'Sign in' })).toBeTruthy()
 })
+
+test('shows a customer search field for filtering inventory', () => {
+  localStorage.clear()
+  const payload = btoa(JSON.stringify({ role: 'user' }))
+  localStorage.setItem('accessToken', `header.${payload}.signature`)
+  render(<App />)
+  expect(screen.getByPlaceholderText('Search make, model, or category')).toBeTruthy()
+})
