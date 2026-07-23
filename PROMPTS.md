@@ -61,3 +61,13 @@ The assistant created tests before implementing the protected vehicle-creation e
 **AI assistance:**
 
 The assistant created tests before implementing protected vehicle listing and search. It added case-insensitive make, model, and category filters, plus inclusive minimum and maximum price filters.
+
+## 2026-07-23 — Step 6: vehicle update and administration
+
+**User prompt:**
+
+> continue step 6
+
+**AI assistance:**
+
+The assistant continued from the existing Red-phase tests, implemented partial vehicle updates for authenticated users, and restricted deletion to administrators. It also added a local password-hidden script for creating the first administrator account through the configured MongoDB connection.

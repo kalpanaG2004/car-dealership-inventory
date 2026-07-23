@@ -38,5 +38,15 @@ The following routes require a valid Bearer token:
 - `POST /api/vehicles`
 - `GET /api/vehicles`
 - `GET /api/vehicles/search?make=&model=&category=&min_price=&max_price=`
+- `PUT /api/vehicles/{id}`
 
-Search text filters are case-insensitive and partial matches. The remaining update, deletion, purchase, and restock endpoints will be added in subsequent test-driven steps.
+`DELETE /api/vehicles/{id}` requires an administrator Bearer token.
+
+Create the initial administrator locally—without exposing its password in shell history—with:
+
+```powershell
+cd backend
+.\.venv\Scripts\python.exe -m scripts.create_admin
+```
+
+Search text filters are case-insensitive and partial matches. The remaining purchase and restock endpoints will be added in subsequent test-driven steps.
