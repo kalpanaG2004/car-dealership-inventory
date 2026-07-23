@@ -51,3 +51,13 @@ The assistant created tests before implementing registration and login. It then 
 **AI assistance:**
 
 The assistant created tests before implementing the protected vehicle-creation endpoint. It then added bearer-token validation, current-user lookup from MongoDB, vehicle request validation, and persisted vehicle creation.
+
+## 2026-07-23 — Step 5: vehicle listing and search
+
+**User prompt:**
+
+> start step 5
+
+**AI assistance:**
+
+The assistant created tests before implementing protected vehicle listing and search. It added case-insensitive make, model, and category filters, plus inclusive minimum and maximum price filters.

@@ -33,4 +33,10 @@ Public registration always creates a `user` account. Administrative roles will b
 
 ## Inventory progress
 
-`POST /api/vehicles` is implemented and requires a valid Bearer token. The remaining vehicle listing, search, update, deletion, purchase, and restock endpoints will be added in subsequent test-driven steps.
+The following routes require a valid Bearer token:
+
+- `POST /api/vehicles`
+- `GET /api/vehicles`
+- `GET /api/vehicles/search?make=&model=&category=&min_price=&max_price=`
+
+Search text filters are case-insensitive and partial matches. The remaining update, deletion, purchase, and restock endpoints will be added in subsequent test-driven steps.
