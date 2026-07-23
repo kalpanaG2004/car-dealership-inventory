@@ -22,11 +22,11 @@ def client(database) -> TestClient:
     app.dependency_overrides.clear()
 
 
-def authorization_header(database) -> dict[str, str]:
+def authorization_header(database, role: str = "user") -> dict[str, str]:
     user_id = database.users.insert_one(
-        {"email": "buyer@example.com", "password_hash": "not-used", "role": "user"}
+        {"email": f"{role}@example.com", "password_hash": "not-used", "role": role}
     ).inserted_id
-    token = create_access_token(str(user_id), "user")
+    token = create_access_token(str(user_id), role)
     return {"Authorization": f"Bearer {token}"}
 
 
@@ -107,3 +107,49 @@ def test_searches_vehicles_by_supported_filters(
 
     assert response.status_code == 200
     assert [vehicle["model"] for vehicle in response.json()] == expected_models
+
+
+def test_updates_a_vehicle_for_an_authenticated_user(database, client: TestClient) -> None:
+    vehicle_id = database.vehicles.insert_one(
+        {"make": "Toyota", "model": "Camry", "category": "Sedan", "price": 28000, "quantity": 4}
+    ).inserted_id
+
+    response = client.put(
+        f"/api/vehicles/{vehicle_id}",
+        headers=authorization_header(database),
+        json={"price": 29500, "quantity": 3},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": str(vehicle_id),
+        "make": "Toyota",
+        "model": "Camry",
+        "category": "Sedan",
+        "price": 29500.0,
+        "quantity": 3,
+    }
+
+
+def test_rejects_vehicle_deletion_for_a_regular_user(database, client: TestClient) -> None:
+    vehicle_id = database.vehicles.insert_one(
+        {"make": "Toyota", "model": "Camry", "category": "Sedan", "price": 28000, "quantity": 4}
+    ).inserted_id
+
+    response = client.delete(f"/api/vehicles/{vehicle_id}", headers=authorization_header(database))
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Admin access required"
+
+
+def test_deletes_a_vehicle_for_an_admin(database, client: TestClient) -> None:
+    vehicle_id = database.vehicles.insert_one(
+        {"make": "Toyota", "model": "Camry", "category": "Sedan", "price": 28000, "quantity": 4}
+    ).inserted_id
+
+    response = client.delete(
+        f"/api/vehicles/{vehicle_id}", headers=authorization_header(database, role="admin")
+    )
+
+    assert response.status_code == 204
+    assert database.vehicles.find_one({"_id": vehicle_id}) is None
