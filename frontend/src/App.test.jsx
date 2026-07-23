@@ -22,3 +22,8 @@ test('shows restock and delete controls for an administrator', async () => {
   expect(await screen.findByRole('button', { name: 'Restock' })).toBeTruthy()
   expect(screen.getByRole('button', { name: 'Delete vehicle' })).toBeTruthy()
 })
+
+test('shows an edit action for an administrator', async () => {
+  render(<App />)
+  expect(await screen.findByRole('button', { name: 'Edit vehicle' })).toBeTruthy()
+})
