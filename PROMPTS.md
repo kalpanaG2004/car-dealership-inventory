@@ -21,3 +21,13 @@ The assistant reviewed the requirements, recommended FastAPI, MongoDB, JWT authe
 **AI assistance:**
 
 The assistant inspected the available tooling and created the initial project layout, dependency manifest, environment examples, Git ignore rules, and this prompt log. No application functionality has been implemented in this step.
+
+## 2026-07-23 — Step 2: backend foundation
+
+**User prompt:**
+
+> start step 2
+
+**AI assistance:**
+
+The assistant guided a test-driven FastAPI foundation: first creating a failing health-check test, then implementing only the application code needed for that test, and finally verifying it with pytest.
