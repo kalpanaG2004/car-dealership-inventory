@@ -27,3 +27,9 @@ test('shows an edit action for an administrator', async () => {
   render(<App />)
   expect(await screen.findByRole('button', { name: 'Edit vehicle' })).toBeTruthy()
 })
+
+test('shows a sign-in form for an unauthenticated visitor', () => {
+  localStorage.clear()
+  render(<App />)
+  expect(screen.getByRole('button', { name: 'Sign in' })).toBeTruthy()
+})
