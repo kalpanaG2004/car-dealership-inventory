@@ -21,3 +21,12 @@ python -m venv .venv
 ```
 
 The health endpoint is available at `GET /api/health`.
+
+## Authentication
+
+Configure `MONGODB_URL`, `MONGODB_DATABASE`, and a strong `JWT_SECRET_KEY` in `backend/.env` before using the authentication endpoints against a real database. The API provides:
+
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+
+Public registration always creates a `user` account. Administrative roles will be created through a controlled setup flow in a later step.

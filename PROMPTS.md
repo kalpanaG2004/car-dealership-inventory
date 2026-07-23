@@ -31,3 +31,13 @@ The assistant inspected the available tooling and created the initial project la
 **AI assistance:**
 
 The assistant guided a test-driven FastAPI foundation: first creating a failing health-check test, then implementing only the application code needed for that test, and finally verifying it with pytest.
+
+## 2026-07-23 — Step 3: authentication
+
+**User prompt:**
+
+> start step 3
+
+**AI assistance:**
+
+The assistant created tests before implementing registration and login. It then added MongoDB configuration, a database dependency, Argon2 password hashing, duplicate-email protection, and JWT login tokens. The tests use a mock MongoDB instance only for isolation; the application configuration targets a real MongoDB connection.
