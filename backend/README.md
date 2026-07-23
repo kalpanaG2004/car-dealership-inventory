@@ -42,6 +42,11 @@ The following routes require a valid Bearer token:
 
 `DELETE /api/vehicles/{id}` requires an administrator Bearer token.
 
+Purchasing and restocking routes:
+
+- `POST /api/vehicles/{id}/purchase` decreases quantity by one and returns `409` when stock is zero.
+- `POST /api/vehicles/{id}/restock` accepts `{ "amount": 1 }` or higher and requires an administrator Bearer token.
+
 Create the initial administrator locally—without exposing its password in shell history—with:
 
 ```powershell
@@ -49,4 +54,4 @@ cd backend
 .\.venv\Scripts\python.exe -m scripts.create_admin
 ```
 
-Search text filters are case-insensitive and partial matches. The remaining purchase and restock endpoints will be added in subsequent test-driven steps.
+Search text filters are case-insensitive and partial matches.

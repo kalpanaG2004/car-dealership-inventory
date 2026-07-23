@@ -51,3 +51,7 @@ class VehicleUpdate(BaseModel):
     category: str | None = Field(default=None, min_length=1, max_length=80)
     price: float | None = Field(default=None, gt=0)
     quantity: int | None = Field(default=None, ge=0)
+
+
+class InventoryChange(BaseModel):
+    amount: int = Field(ge=1)

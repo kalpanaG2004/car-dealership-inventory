@@ -71,3 +71,13 @@ The assistant created tests before implementing protected vehicle listing and se
 **AI assistance:**
 
 The assistant continued from the existing Red-phase tests, implemented partial vehicle updates for authenticated users, and restricted deletion to administrators. It also added a local password-hidden script for creating the first administrator account through the configured MongoDB connection.
+
+## 2026-07-23 — Step 7: purchasing and restocking
+
+**User prompt:**
+
+> start step 7
+
+**AI assistance:**
+
+The assistant created tests before implementing purchase and restock workflows. It used a conditional MongoDB update to prevent stock from going below zero, returned a clear out-of-stock response, and restricted restocking to administrators.

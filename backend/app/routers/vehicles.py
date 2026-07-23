@@ -9,7 +9,7 @@ from pymongo.database import Database
 
 from app.database import get_database
 from app.dependencies import get_current_user, require_admin
-from app.schemas import VehicleCreate, VehicleResponse, VehicleUpdate
+from app.schemas import InventoryChange, VehicleCreate, VehicleResponse, VehicleUpdate
 
 router = APIRouter(prefix="/api/vehicles", tags=["vehicles"])
 
@@ -108,3 +108,43 @@ def delete_vehicle(
     vehicle = get_vehicle_or_404(database, vehicle_id)
     database.vehicles.delete_one({"_id": vehicle["_id"]})
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post("/{vehicle_id}/purchase", response_model=VehicleResponse)
+def purchase_vehicle(
+    vehicle_id: str,
+    database: Database = Depends(get_database),
+    _: dict[str, Any] = Depends(get_current_user),
+) -> VehicleResponse:
+    try:
+        object_id = ObjectId(vehicle_id)
+    except InvalidId as error:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vehicle not found") from error
+
+    vehicle = database.vehicles.find_one_and_update(
+        {"_id": object_id, "quantity": {"$gt": 0}},
+        {"$inc": {"quantity": -1}},
+        return_document=ReturnDocument.AFTER,
+    )
+    if vehicle is None:
+        if database.vehicles.find_one({"_id": object_id}) is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Vehicle not found")
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Vehicle is out of stock")
+
+    return serialize_vehicle(vehicle)
+
+
+@router.post("/{vehicle_id}/restock", response_model=VehicleResponse)
+def restock_vehicle(
+    vehicle_id: str,
+    payload: InventoryChange,
+    database: Database = Depends(get_database),
+    _: dict[str, Any] = Depends(require_admin),
+) -> VehicleResponse:
+    vehicle = get_vehicle_or_404(database, vehicle_id)
+    updated_vehicle = database.vehicles.find_one_and_update(
+        {"_id": vehicle["_id"]},
+        {"$inc": {"quantity": payload.amount}},
+        return_document=ReturnDocument.AFTER,
+    )
+    return serialize_vehicle(updated_vehicle)
