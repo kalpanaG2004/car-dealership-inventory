@@ -16,6 +16,15 @@ backend/     FastAPI API and backend tests
 frontend/    React single-page application
 ```
 
+## Live deployment
+
+The assignment is deployed as a full-stack application using Vercel for the React frontend, Render for the FastAPI API, and MongoDB Atlas for persistent data.
+
+- **Frontend:** [DriveFlow inventory application](https://car-dealership-inventory-eey6rqeaa-kalpanag2004s-projects.vercel.app/)
+- **Backend API:** [Render API](https://car-dealership-inventory-t8ip.onrender.com/)
+- **API documentation:** [FastAPI Swagger UI](https://car-dealership-inventory-t8ip.onrender.com/docs)
+- **Health check:** [API health endpoint](https://car-dealership-inventory-t8ip.onrender.com/api/health)
+
 ## Run locally
 
 1. Copy `backend/.env.example` to `backend/.env` and set `MONGODB_URL`, `MONGODB_DATABASE`, and `JWT_SECRET_KEY`.
@@ -26,7 +35,7 @@ The API runs at `http://127.0.0.1:8000` and the Vite application runs at `http:/
 
 ## Deploy (Render + Vercel)
 
-This project is prepared for a free-tier-friendly split deployment: MongoDB Atlas for data, Render for the FastAPI API, and Vercel for the React frontend. This keeps the assignment's React, FastAPI, MongoDB, JWT, and role-based workflows intact.
+This project uses a free-tier-friendly split deployment: MongoDB Atlas for data, Render for the FastAPI API, and Vercel for the React frontend. This keeps the assignment's React, FastAPI, MongoDB, JWT, and role-based workflows intact.
 
 1. Push the current `main` branch to GitHub. Do not commit `backend/.env`.
 2. In Render, select **New > Blueprint** and choose this repository. The included [`render.yaml`](render.yaml) creates the API service. Set these environment variables in the Render service:
@@ -35,9 +44,9 @@ This project is prepared for a free-tier-friendly split deployment: MongoDB Atla
    - `JWT_SECRET_KEY`: a new random secret of at least 32 characters
    - `JWT_ALGORITHM`: `HS256`
    - `ACCESS_TOKEN_EXPIRE_MINUTES`: `60`
-3. Deploy Render and confirm `https://<your-api>.onrender.com/api/health` returns `{ "status": "ok" }`.
+3. Deploy Render and confirm `https://<your-api>.onrender.com/api/health` returns `{ "status": "ok" }`. The current production API is `https://car-dealership-inventory-t8ip.onrender.com`.
 4. In Vercel, import the same GitHub repository. Set **Root Directory** to `frontend`; Vercel will use `npm run build` and publish `dist` automatically. Add the build-time environment variable `VITE_API_BASE_URL=https://<your-api>.onrender.com` (no trailing slash), then deploy.
-5. Copy the production Vercel URL and return to Render. Set `CORS_ORIGINS` to that exact URL, for example `https://car-dealership-inventory.vercel.app`, then redeploy the API. Add a comma-separated preview URL too only if you need browser testing on Vercel previews.
+5. Copy the production Vercel URL and return to Render. Set `CORS_ORIGINS` to that exact URL, then redeploy the API. The current production frontend is `https://car-dealership-inventory-eey6rqeaa-kalpanag2004s-projects.vercel.app`. Add a comma-separated preview URL too only if you need browser testing on Vercel previews.
 6. Run `python -m scripts.create_admin` from `backend` with the same production environment variables to create the administrator account. Verify customer search/purchase and administrator create, edit, restock, and delete in the deployed site, then capture the four assignment screenshots listed below.
 
 `VITE_API_BASE_URL` is intentionally a frontend build variable; changing it requires a new Vercel deployment. `CORS_ORIGINS` belongs only in Render and must never be `*` because the API accepts bearer credentials.
@@ -75,9 +84,11 @@ The automated verification completed on 2026-07-23 consists of 19 backend tests,
 | Administrator edit | Passed (category and price updated) |
 | Administrator deletion | Passed (test vehicle removed) |
 
+The backend and frontend were deployed successfully on 2026-07-24. The live links are listed in the [Live deployment](#live-deployment) section above.
+
 ## Screenshots
 
-Screenshots must be captured with a browser connected to the local Vite application and saved under `docs/screenshots/` using the four states in the acceptance checklist above. Screenshot capture was not possible in the automated delivery environment because no browser was available to control; no placeholder images are included or represented as live evidence.
+Capture the four states in the acceptance checklist from the deployed frontend and save them under `docs/screenshots/` before submitting. Screenshot capture was not possible in the automated delivery environment, so no placeholder images are included or represented as live evidence.
 
 ## My AI Usage
 

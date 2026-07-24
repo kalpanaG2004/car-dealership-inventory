@@ -111,3 +111,14 @@ The assistant started the local FastAPI and Vite services and verified the healt
 **AI assistance:**
 
 The assistant confirmed Atlas connectivity, created a delivery administrator, and performed a live API acceptance test: customer registration/login/search/purchase and administrator vehicle creation/restock/edit/deletion all passed. The temporary test vehicle was deleted after the run. The browser runtime still had no available browser, so screenshots could not be captured or falsely represented; the README records the verified results and required screenshot directory.
+
+## 2026-07-24 — Step 11: production deployment and delivery finalization
+
+**User prompt:**
+
+> i have now successfully deployed my backend on render https://car-dealership-inventory-t8ip.onrender.com & frontend on vercel https://car-dealership-inventory-eey6rqeaa-kalpanag2004s-projects.vercel.app/
+> now what are the changes that i need to do in my documentations to showcase these. let's finalize the project now with an apt commit aligned with the assignment
+
+**AI assistance:**
+
+The assistant updated the README to record the live Vercel frontend, Render API, Swagger documentation, and health-check URLs. It also clarified that screenshots must be taken from the deployed application and saved as submission evidence, without claiming screenshots that were not captured. The deployment documentation and this AI usage history were finalized in a documentation-only commit.
