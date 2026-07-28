@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     jwt_secret_key: str = "development-secret-key-must-be-at-least-32-bytes"
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
-    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173"
+    cors_origins: str = "http://localhost:5173,http://127.0.0.1:5173,https://car-dealership-inventory-mauve.vercel.app/"
 
     model_config = SettingsConfigDict(
         env_file=Path(__file__).resolve().parents[1] / ".env",
