@@ -20,7 +20,7 @@ frontend/    React single-page application
 
 The assignment is deployed as a full-stack application using Vercel for the React frontend, Render for the FastAPI API, and MongoDB Atlas for persistent data.
 
-- **Frontend:** [DriveFlow inventory application](https://car-dealership-inventory-eey6rqeaa-kalpanag2004s-projects.vercel.app/)
+- **Frontend:** [DriveFlow inventory application](https://car-dealership-inventory-mauve.vercel.app/)
 - **Backend API:** [Render API](https://car-dealership-inventory-t8ip.onrender.com/)
 - **API documentation:** [FastAPI Swagger UI](https://car-dealership-inventory-t8ip.onrender.com/docs)
 - **Health check:** [API health endpoint](https://car-dealership-inventory-t8ip.onrender.com/api/health)
@@ -46,7 +46,7 @@ This project uses a free-tier-friendly split deployment: MongoDB Atlas for data,
    - `ACCESS_TOKEN_EXPIRE_MINUTES`: `60`
 3. Deploy Render and confirm `https://<your-api>.onrender.com/api/health` returns `{ "status": "ok" }`. The current production API is `https://car-dealership-inventory-t8ip.onrender.com`.
 4. In Vercel, import the same GitHub repository. Set **Root Directory** to `frontend`; Vercel will use `npm run build` and publish `dist` automatically. Add the build-time environment variable `VITE_API_BASE_URL=https://<your-api>.onrender.com` (no trailing slash), then deploy.
-5. Copy the production Vercel URL and return to Render. Set `CORS_ORIGINS` to that exact URL, then redeploy the API. The current production frontend is `https://car-dealership-inventory-eey6rqeaa-kalpanag2004s-projects.vercel.app`. Add a comma-separated preview URL too only if you need browser testing on Vercel previews.
+5. Copy the production Vercel URL and return to Render. Set `CORS_ORIGINS` to that exact URL, then redeploy the API. The current production frontend is `https://car-dealership-inventory-mauve.vercel.app`. Preview deployments are already supported by the backend CORS regex configuration, so no additional preview URL is required in CORS_ORIGINS.
 6. Run `python -m scripts.create_admin` from `backend` with the same production environment variables to create the administrator account. Verify customer search/purchase and administrator create, edit, restock, and delete in the deployed site, then capture the four assignment screenshots listed below.
 
 `VITE_API_BASE_URL` is intentionally a frontend build variable; changing it requires a new Vercel deployment. `CORS_ORIGINS` belongs only in Render and must never be `*` because the API accepts bearer credentials.
@@ -88,7 +88,20 @@ The backend and frontend were deployed successfully on 2026-07-24. The live link
 
 ## Screenshots
 
-Capture the four states in the acceptance checklist from the deployed frontend and save them under `docs/screenshots/` before submitting. Screenshot capture was not possible in the automated delivery environment, so no placeholder images are included or represented as live evidence.
+### Login and registration
+![Login page](docs/screenshots/login-page.png)
+
+### Customer dashboard
+![User dashboard](docs/screenshots/user-dashboard.png)
+
+### Customer inventory search and filter
+![Search and filter](docs/screenshots/search-filter.png)
+
+### Administrator add and edit vehicle
+![Admin edit vehicle](docs/screenshots/admin-edit-vehicle.png)
+
+### Administrator vehicle purchase
+![Vehicle purchase](docs/screenshots/vehicle-purchase.png)
 
 ## My AI Usage
 
